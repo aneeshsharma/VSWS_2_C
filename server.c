@@ -16,6 +16,7 @@
 #define PORT 5000
 
 #define BUFFER_SIZE 1024
+#define MAX_REQUEST_SIZE 200
 
 int get_reqest_page(char *request, char *page)
 {
@@ -52,11 +53,11 @@ void *handle_client(void *arg)
     int recv_len = recv(sock_fd, buffer, BUFFER_SIZE, 0);
 
     int x = 0;
-    char request[200];
-    char page[200];
+    char request[MAX_REQUEST_SIZE];
+    char page[MAX_REQUEST_SIZE];
 
     // Get the line of request
-    for (x = 0; buffer[x] != '\n'; x++)
+    for (x = 0; buffer[x] != '\n' && x < MAX_REQUEST_SIZE - 1; x++)
     {
         request[x] = buffer[x];
     }
