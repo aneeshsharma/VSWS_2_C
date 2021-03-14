@@ -134,7 +134,7 @@ int main()
 
     printf("Serving at http://0.0.0.0:%d\n", PORT);
 
-    if (listen(server_fd, 3) < 0)
+    if (listen(server_fd, 10) < 0)
     {
         printf("\nError listening to socket\n");
         return -1;
