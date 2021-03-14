@@ -1,3 +1,10 @@
+/*
+ * Very Simple Web Server
+ * A simple HTTP server implemented in C
+ * Author:  Anish Sharma
+ * Date:    14-03-2021
+ */
+
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/socket.h>
@@ -47,6 +54,8 @@ void *handle_client(void *arg)
     int x = 0;
     char request[200];
     char page[200];
+
+    // Get the line of request
     for (x = 0; buffer[x] != '\n'; x++)
     {
         request[x] = buffer[x];
@@ -55,6 +64,7 @@ void *handle_client(void *arg)
 
     printf("- Received request: %s\n", request);
 
+    // Send not found for all requests except homepage
     if (!get_reqest_page(request, page) || strlen(page) != 0)
     {
         printf("- Page %s not found!\n", page);
@@ -71,6 +81,8 @@ void *handle_client(void *arg)
         close(sock_fd);
         return NULL;
     }
+
+    // Send HTTP 200 OK response for homepage with content inside message
 
     count = 0;
     count += sprintf(buffer + count, "HTTP/1.0 200 OK\n");
@@ -96,6 +108,7 @@ int main()
     char buffer[BUFFER_SIZE] = {0};
 
     printf("Starting Very Simple Web Server....\n");
+    printf("A simple server that responsds to HTTP requests\n");
 
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -119,7 +132,7 @@ int main()
         return -1;
     }
 
-    printf("Serving HTTP server at http://0.0.0.0:%d\n", PORT);
+    printf("Serving at http://0.0.0.0:%d\n", PORT);
 
     if (listen(server_fd, 3) < 0)
     {
