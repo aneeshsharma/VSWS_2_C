@@ -1,4 +1,4 @@
-# VSWSInC
+# Very Simple Web Server
 A Very Simple Web Server implemented in C
 
 The server has been implemented using TCP sockets. The server when receives a GET request, checks for what page was requested and sends a welcome message when the homepage is accessed. Currently, the server sends 404 Error Not Found for all requests except the homepage.
