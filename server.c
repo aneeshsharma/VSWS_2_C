@@ -12,11 +12,26 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <pthread.h>
+#include <time.h>
 
-#define PORT 5000
+#define PORT 8080
 
 #define BUFFER_SIZE 1024
 #define MAX_REQUEST_SIZE 200
+
+char *get_time_string()
+{
+    time_t current_time;
+    struct tm *tm_info;
+
+    char *c_time_string = calloc(100, sizeof(char));
+
+    current_time = time(NULL);
+    tm_info = gmtime(&current_time);
+    strftime(c_time_string, 100, "%a, %d %b %Y %I:%M:%S GMT", tm_info);
+
+    return c_time_string;
+}
 
 int get_reqest_page(char *request, char *page)
 {
@@ -65,6 +80,8 @@ void *handle_client(void *arg)
 
     printf("- Received request: %s\n", request);
 
+    char *current_time = get_time_string();
+
     // Send not found for all requests except homepage
     if (!get_reqest_page(request, page) || strlen(page) != 0)
     {
@@ -72,13 +89,16 @@ void *handle_client(void *arg)
         count = 0;
         count += sprintf(buffer + count, "HTTP/1.0 404 File not found\n");
         count += sprintf(buffer + count, "Server: VSWSInC/0.0\n");
-        count += sprintf(buffer + count, "Date: \n");
+        count += sprintf(buffer + count, "Date: %s\n", current_time);
         count += sprintf(buffer + count, "Connection: close\n");
         count += sprintf(buffer + count, "Content-type: text/plain\n");
         count += sprintf(buffer + count, "Content-Length: 9\n");
-        count += sprintf(buffer + count, "Last-Modified: \n");
+        count += sprintf(buffer + count, "Last-Modified: %s\n", current_time);
         count += sprintf(buffer + count, "\nRequested page Not Found\n");
         send(sock_fd, buffer, count, 0);
+
+        free(current_time);
+
         close(sock_fd);
         return NULL;
     }
@@ -88,14 +108,16 @@ void *handle_client(void *arg)
     count = 0;
     count += sprintf(buffer + count, "HTTP/1.0 200 OK\n");
     count += sprintf(buffer + count, "Server: VSWSInC/0.0\n");
-    count += sprintf(buffer + count, "Date: \n");
+    count += sprintf(buffer + count, "Date: %s\n", current_time);
     count += sprintf(buffer + count, "Content-type: text/plain\n");
     count += sprintf(buffer + count, "Content-Length: %d\n", strlen(message));
-    count += sprintf(buffer + count, "Last-Modified: \n");
+    count += sprintf(buffer + count, "Last-Modified: %s\n", current_time);
 
     count += sprintf(buffer + count, "\n%s\n", message);
 
     send(sock_fd, buffer, count, 0);
+
+    free(current_time);
 
     close(sock_fd);
 }
