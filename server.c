@@ -64,6 +64,7 @@ void *handle_client(void *arg)
     char *message = "Welcome to Networks Lab!";
 
     char buffer[BUFFER_SIZE];
+    char page_buffer[BUFFER_SIZE];
 
     int recv_len = recv(sock_fd, buffer, BUFFER_SIZE, 0);
 
@@ -82,8 +83,10 @@ void *handle_client(void *arg)
 
     char *current_time = get_time_string();
 
+    int res = get_reqest_page(request, page);
+
     // Send not found for all requests except homepage
-    if (!get_reqest_page(request, page) || strlen(page) != 0)
+    if (!res)
     {
         printf("- Page %s not found!\n", page);
         count = 0;
@@ -103,20 +106,48 @@ void *handle_client(void *arg)
         return NULL;
     }
 
-    // Send HTTP 200 OK response for homepage with content inside message
+    if (strcmp(page, "mypage.html") == 0)
+    {
+        FILE *page = fopen("mypage.html", "r");
+        fseek(page, 0, SEEK_END);
+        int fsize = ftell(page);
+        fseek(page, 0, SEEK_SET);
+        char *content = (char *)calloc(fsize, sizeof(char));
+        fread(content, sizeof(char), fsize, page);
 
-    count = 0;
-    count += sprintf(buffer + count, "HTTP/1.0 200 OK\n");
-    count += sprintf(buffer + count, "Server: VSWSInC/0.0\n");
-    count += sprintf(buffer + count, "Date: %s\n", current_time);
-    count += sprintf(buffer + count, "Content-type: text/plain\n");
-    count += sprintf(buffer + count, "Content-Length: %d\n", strlen(message));
-    count += sprintf(buffer + count, "Last-Modified: %s\n", current_time);
+        printf("\n%s\n", content);
 
-    count += sprintf(buffer + count, "\n%s\n", message);
+        fclose(page);
 
-    send(sock_fd, buffer, count, 0);
+        count = 0;
+        count += sprintf(buffer + count, "HTTP/1.0 200 OK\n");
+        count += sprintf(buffer + count, "Server: VSWSInC/0.0\n");
+        count += sprintf(buffer + count, "Date: %s\n", current_time);
+        count += sprintf(buffer + count, "Content-type: text/html\n");
+        count += sprintf(buffer + count, "Content-Length: %d\n", fsize);
+        count += sprintf(buffer + count, "Last-Modified: %s\n", current_time);
 
+        count += sprintf(buffer + count, "\n%s\n", content);
+
+        send(sock_fd, buffer, count, 0);
+    }
+    else
+    {
+
+        // Send HTTP 200 OK response for homepage with content inside message
+
+        count = 0;
+        count += sprintf(buffer + count, "HTTP/1.0 200 OK\n");
+        count += sprintf(buffer + count, "Server: VSWSInC/0.0\n");
+        count += sprintf(buffer + count, "Date: %s\n", current_time);
+        count += sprintf(buffer + count, "Content-type: text/plain\n");
+        count += sprintf(buffer + count, "Content-Length: %d\n", strlen(message));
+        count += sprintf(buffer + count, "Last-Modified: %s\n", current_time);
+
+        count += sprintf(buffer + count, "\n%s\n", message);
+
+        send(sock_fd, buffer, count, 0);
+    }
     free(current_time);
 
     close(sock_fd);
