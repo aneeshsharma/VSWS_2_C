@@ -157,9 +157,9 @@ void *handle_client(void *arg)
         count += sprintf(buffer + count, "Date: %s\n", current_time);
         count += sprintf(buffer + count, "Connection: close\n");
         count += sprintf(buffer + count, "Content-type: text/plain\n");
-        count += sprintf(buffer + count, "Content-Length: 9\n");
+        count += sprintf(buffer + count, "Content-Length: 25\n");
         count += sprintf(buffer + count, "Last-Modified: %s\n", current_time);
-        count += sprintf(buffer + count, "\nRequested page Not Found\n");
+        count += sprintf(buffer + count, "\n404 error: File not found\n");
         send(sock_fd, buffer, count, 0);
     }
     free(current_time);
