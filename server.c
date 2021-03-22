@@ -61,7 +61,7 @@ void *handle_client(void *arg)
     int sock_fd = *((int *)arg);
 
     int count = 0;
-    char *message = "Welcome to Networks Lab!";
+    char *message = "Welcome to the Dept. of CSE!";
 
     char buffer[BUFFER_SIZE];
     char page_buffer[BUFFER_SIZE];
@@ -131,7 +131,7 @@ void *handle_client(void *arg)
 
         send(sock_fd, buffer, count, 0);
     }
-    else
+    else if (strlen(page) == 0)
     {
 
         // Send HTTP 200 OK response for homepage with content inside message
@@ -146,6 +146,20 @@ void *handle_client(void *arg)
 
         count += sprintf(buffer + count, "\n%s\n", message);
 
+        send(sock_fd, buffer, count, 0);
+    }
+    else
+    {
+        printf("- Page %s not found!\n", page);
+        count = 0;
+        count += sprintf(buffer + count, "HTTP/1.0 404 File not found\n");
+        count += sprintf(buffer + count, "Server: VSWSInC/0.0\n");
+        count += sprintf(buffer + count, "Date: %s\n", current_time);
+        count += sprintf(buffer + count, "Connection: close\n");
+        count += sprintf(buffer + count, "Content-type: text/plain\n");
+        count += sprintf(buffer + count, "Content-Length: 9\n");
+        count += sprintf(buffer + count, "Last-Modified: %s\n", current_time);
+        count += sprintf(buffer + count, "\nRequested page Not Found\n");
         send(sock_fd, buffer, count, 0);
     }
     free(current_time);
